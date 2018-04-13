@@ -1,3 +1,16 @@
+/**
+ *  Conway's Game of Life
+ *  Rules:
+ *  1. Any live cell with fewer than 2 neighbors dies
+ *  2. Any live cell with two or three neighbors lives on to the next generation
+ *  3. Any live cell with more than three neighbors dies
+ *  4. Any dead cell with exactly three live neighbors becomes a live cell
+ *  
+ *  This implementation of life has an infinitely sized grid that the user can scroll through.
+ *  The window is also resizeable, and you can zoom in and out to make cells bigger or smaller.
+ */
+
+
 #include "list.h"
 #include "render.h"
 #include "inputs.h"
@@ -22,6 +35,9 @@ int main(int argc, char *argv[])
          * update just updates the arrays for which keys are pressed
          */
         updateInputs(&paused, &going);
+        if (!going)
+            break;
+        
         handleInputs();
         
         step();
