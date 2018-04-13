@@ -1,4 +1,5 @@
 extern struct Cell;
+extern struct Row;
 
 void initGame(void);
 void deinitGame(void);
