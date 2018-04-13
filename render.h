@@ -1,3 +1,3 @@
 void initRender(int *going);
-void deinigRender(void);
+void deinitRender(void);
 void draw(void);
