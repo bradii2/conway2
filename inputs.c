@@ -3,12 +3,13 @@
 
 SDL_Event e;
 
-enum keys { SPACE, S_KEY, ENTER, L_CLICK, R_CLICK, UP_ARROW, DOWN_ARROW,
-            CTRL, EQUAL, MINUS, EMPTY, KEYS_LENGTH };
 int currKeys[KEYS_LENGTH];
 int prevKeys[KEYS_LENGTH];
 
-void actionInputs(int *paused);
+/* Variable to tell if the program should be stopped */
+int stop = 0;
+int winW = 0;
+int winH = 0;
 
 struct
 {
@@ -25,7 +26,7 @@ void initInptus(void)
     }
 }
 
-int handleInputs(int *paused, int *going)
+int updateInputs(void)
 {
     int i;
     for (i = 0; i < KEYS_LENGTH; ++i)
@@ -35,7 +36,7 @@ int handleInputs(int *paused, int *going)
         switch(e.type)
         {
         case SDL_QUIT:
-            *going = 0;
+            stop = 1;
             break;
         /* Keyboard Event */
         case SDL_KEYDOWN:
@@ -97,9 +98,20 @@ int handleInputs(int *paused, int *going)
             Mouse.x = e.motion.x;
             Mouse.y = e.motion.y;
             break;
+        /* Window Event */
+        case SDL_WINDOWEVENT:
+            /* We only care about window resizes here */
+            if (e.event != SDL_WINDOWEVENT_RESIZED)
+                break;
+            winW = e.window.data1;
+            winH = e.window.data2;
+            i = RESIZED;
+            currKeys[i] = 1;
+            break;
+        default:
+            break;
         }
     }
-    actionInputs(paused);
 }
 
 int getInput(int num)
@@ -110,17 +122,31 @@ int getInput(int num)
 }
 int getFirstInput(int num)
 {
-    if (num < 0 || num > KEYS_LENGTH0
+    if (num < 0 || num > KEYS_LENGTH)
         return 0;
     return currKeys[num] && !prevKeys[num];
 }
 
 /* TODO: finish this */
-void actionInputs(int *paused)
+void handleInputs(int *paused, int *going)
 {
-    
+    if (stop)
+    {
+        *going = 0;
+        break;
+    }
+    if (getFirstInput(SPACE))
+        *paused = !(*paused);
 }
 
+int getWindowW(void)
+{
+    return winW;
+}
+int getWindowH(void)
+{
+    return winH;
+}
 
 
 

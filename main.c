@@ -34,11 +34,11 @@ int main(int argc, char *argv[])
         /* Handle actually does the changes to the program - 
          * update just updates the arrays for which keys are pressed
          */
-        updateInputs(&paused, &going);
+        updateInputs();
         if (!going)
             break;
         
-        handleInputs();
+        handleInputs(&paused, &going);
         
         step();
         draw();
