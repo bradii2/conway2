@@ -6,6 +6,10 @@ SDL_Event e;
 int currKeys[KEYS_LENGTH];
 int prevKeys[KEYS_LENGTH];
 
+/* Make an array of funciton pointers */
+typedef void (*func_ptr)(void);
+func_ptr keyFuncs[KEYS_LENGTH];
+
 /* Variable to tell if the program should be stopped */
 int stop = 0;
 int winW = 0;
@@ -23,6 +27,7 @@ void initInptus(void)
     {
         currKeys[i] = 0;
         prevKeys[i] = 0;
+        keyFuncs[i] = NULL;
     }
 }
 
@@ -106,6 +111,12 @@ int updateInputs(void)
             winW = e.window.data1;
             winH = e.window.data2;
             i = RESIZED;
+            /* TODO: */
+            /* We have to set this to 0 if SDL_WINDOWEVENT_RESIZED is not called in a frame! */
+            /* Do this in render.c after checking for this key? But then other files 
+             * would have direct access to currKeys[]...
+             * Or, we could just check the size every frame... it's unnecessary, but won't slow the program down noticeably
+             */
             currKeys[i] = 1;
             break;
         default:
@@ -130,13 +141,38 @@ int getFirstInput(int num)
 /* TODO: finish this */
 void handleInputs(int *paused, int *going)
 {
+    int i;
+    /* Tell the program to stop if you are trying to close the window */
     if (stop)
     {
         *going = 0;
         break;
     }
+    /* Set PAUSED when spacebar is pressed */
     if (getFirstInput(SPACE))
         *paused = !(*paused);
+    
+    /* Now, for the real stuff */
+    /* Because most buttons do something that should happen in different parts of the program, 
+     * we pass a funciton to call and store it in an array from setKeyFunc() function
+     */
+    for (i = 0; i < KEYS_LENGTH; ++i)
+    {
+        if (keyFuncs[i] == NULL)
+            continue;
+        /* If the funciton exists, call it */
+        keyFuncs[i]();
+    }
+}
+
+/* Arguments: f = a void-returning function with no arguments 
+ *            key = the key that will call the function when pressed
+ */
+void setKeyFunc(int key, void (*f)(void))
+{
+    if (key < 0 || key >= KEYS_LENGTH)
+        return;
+    keyFuncs[key] = f;
 }
 
 int getWindowW(void)

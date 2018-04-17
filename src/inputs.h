@@ -15,6 +15,8 @@ int getInput(int key);
  */
 int getFirstInput(int key);
 
+void setKeyFunc(int key, void (*f)(void));
+
 int getWindowW(void);
 int getWindowH(void);
 
