@@ -1,4 +1,6 @@
 #include "list.h"
+#include "stdlib.h"
+#include <stdio.h>
 
 Cell *createCell(int x)
 {
@@ -13,6 +15,12 @@ Cell *createCell(int x)
 void addCell(Cell **head, Cell *c)
 {
     Cell *curr = *head;
+    
+    if (curr == NULL)
+    {
+        curr = c;
+        return;
+    }
     while (curr->next != NULL)
         curr = curr->next;
     curr->next = c;
@@ -42,7 +50,7 @@ void removeCell(Cell **head, int x)
     {
         if (temp->next->x == x)
         {
-            toRemoe = temp->next;
+            toRemove = temp->next;
             temp->next = temp->next->next;
             freeCell(&toRemove);
             return;
@@ -56,6 +64,7 @@ Row *createRow(int y)
     r->y = y;
     r->next = NULL;
     r->cells = NULL;
+    return r;
 }
 void addRow(Row **head, Row *r)
 {
@@ -76,14 +85,14 @@ void destroyRows(Row **head)
 }
 void removeRow(Row **head, int y)
 {
-    Row *toDelete;
+    Row *toRemove;
     Row *temp;
     /* If you are trying to remove the head node */
     if ((*head)->y == y)
     {
-        toDelete = *head;
-        temp = toDelete->next;
-        freeRow(&toDelete);
+        toRemove = *head;
+        temp = toRemove->next;
+        freeRow(&toRemove);
         *head = temp;
         return;
     }

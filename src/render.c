@@ -2,7 +2,10 @@
 #include "game.h"
 #include "list.h"
 #include "inputs.h"
+#include <stdio.h>
 #include <SDL2/SDL.h>
+
+#define CELL_DEFAULT 50.0
 
 SDL_Window  *window;
 SDL_Surface *windowSurface;
@@ -14,10 +17,16 @@ SDL_Surface *blackSurface;
  * WINDOW_W and WINDOW_H are changed when the window is resized
  */ 
 int WINDOW_W, WINDOW_H, CELL_W, CELL_H;
+int zoom = 100;
 
 /* The offsets are for rendering */
 /* Measured by # of pixels */
 int offsetX, offsetY;
+
+/* Keypress functions */
+void windowResized(void);
+void zoomChange(void);
+void moveWindow(void); /* moveWindow is for when the inner window moves, not the whole program */
 
 void initRender(int *going)
 {
@@ -50,42 +59,89 @@ void initRender(int *going)
     SDL_FillRect(whiteSurface, NULL, SDL_MapRGB(whiteSurface->format, 255, 255, 255));
     SDL_FillRect(blackSurface, NULL, SDL_MapRGB(blackSurface->format, 0  , 0  , 0  ));
     SDL_FillRect(greySurface , NULL, SDL_MapRGB(greySurface->format , 127, 127, 127));
+    
+    /* Here, init the functions for inputs */
+    setKeyFunc(RESIZED, windowResized);
+    setKeyFunc(W_KEY, moveWindow);
+    setKeyFunc(A_KEY, moveWindow);
+    setKeyFunc(S_KEY, moveWindow);
+    setKeyFunc(D_KEY, moveWindow);
+    setKeyFunc(EQUAL, zoomChange);
+    setKeyFunc(MINUS, zoomChange);
 }
 void deinitRender(void)
 {
     SDL_FreeSurface(windowSurface);
     SDL_FreeSurface(greySurface);
     SDL_FreeSurface(whiteSurface);
-    SDL_Freesurface(blackSurface);
+    SDL_FreeSurface(blackSurface);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
 /* TODO: get this up and running */
 /* This is called after every game update and every event that could cause visual changes */
-void draw(void)
+void draw(Row *head)
 {
+    Cell *currC;
+    Row *currR;
+    SDL_Rect cell;
+    
+    cell.w = CELL_W;
+    cell.h = CELL_H;
     /* First, for testing, just render an area from (0, 0) to (60, 60) */
     /* Use CELL and WINDOW measurements to find out how many cells per row/column */
     
-    /* If the window has changed size, get that size */
-    if (getFirstInput(RESIZED))
+    /* Iterate through the list of cells, and if it's within the bounds, draw it */
+    /* I hope this works lol */
+    for (currR = head; currR->next != NULL; currR = currR->next)
     {
-        WINDOW_W = getWindowW();
-        WINDOW_H = getWindowH();
+        for (currC = currR->cells; currC != NULL && currC->next != NULL; currC = currC->next)
+        {
+            cell.x = currC->x * CELL_W + offsetX;
+            cell.y = currR->y * CELL_H + offsetY;
+            if (cell.x > 0 && cell.x + cell.w < WINDOW_W && 
+                cell.y > 0 && cell.y + cell.h < WINDOW_H)
+                SDL_BlitScaled(whiteSurface, NULL, windowSurface, &cell);
+        }
     }
-    
+    /* Instead of iterating through every cell, maybe check every DEISPLAYED cell */
+    /* to see if it exists? I think this won't be any more effecient since the program */
+    /* would still have to go through every cell to check if it exists anyway */
     
     
     /* Actually draw the frame */
     SDL_UpdateWindowSurface(window);
 }
 
-
-
-
-
-
+/* Some inputs are handled by render - like window resizing and zooming */
+void windowResized(void)
+{
+    WINDOW_W = getWindowW();
+    WINDOW_H = getWindowH();
+    
+}
+void zoomChange(void)
+{
+    if (getFirstInput(EQUAL))
+        zoom += 1;
+    if (getFirstInput(MINUS))
+        zoom -= 1;
+    
+    if (zoom < 10)
+        zoom = 10;
+    else if (zoom > 200)
+        zoom = 200;
+    
+    CELL_W = CELL_H = (int) ((zoom / 100.0) * CELL_DEFAULT);
+}
+void moveWindow(void)
+{
+    offsetX += getInput(D_KEY);
+    offsetX -= getInput(A_KEY);
+    offsetY += getInput(S_KEY);
+    offsetY -= getInput(W_KEY);
+}
 
 
 

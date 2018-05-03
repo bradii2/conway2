@@ -15,6 +15,7 @@
 #include "render.h"
 #include "inputs.h"
 #include "game.h"
+#define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 
 int going  = 1;
@@ -35,13 +36,13 @@ int main(int argc, char *argv[])
          * update just updates the arrays for which keys are pressed
          */
         updateInputs();
+        handleInputs(&paused, &going);
         if (!going)
             break;
+
+        gameLoop(paused);
         
-        handleInputs(&paused, &going);
-        
-        step();
-        draw();
+        gameDraw();
     }
     
     deinit();
@@ -49,13 +50,14 @@ int main(int argc, char *argv[])
 
 void init(void)
 {
-    initRender(&going);
+    /* Call initInputs() before any other inits that use setKeyFunc()! */
     initInputs();
+    initRender(&going);
     initGame();
 }
 void deinit(void)
 {
     deinitRender();
-    deinitInputs();
     deinitGame();
+    deinitInputs();
 }

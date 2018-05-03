@@ -1,7 +1,10 @@
 #include "inputs.h"
+#include <stdio.h>
 #include <SDL2/SDL.h>
 
 SDL_Event e;
+
+Mouse *mouse;
 
 int currKeys[KEYS_LENGTH];
 int prevKeys[KEYS_LENGTH];
@@ -15,23 +18,21 @@ int stop = 0;
 int winW = 0;
 int winH = 0;
 
-struct
-{
-    int x, y;
-} Mouse;
-
-void initInptus(void)
+void initInputs(void)
 {
     int i;
     for (i = 0; i < KEYS_LENGTH; ++i)
     {
-        currKeys[i] = 0;
-        prevKeys[i] = 0;
+        currKeys[i] = prevKeys[i] = 0;
         keyFuncs[i] = NULL;
     }
+    mouse = (Mouse*) malloc(sizeof(Mouse));
 }
-
-int updateInputs(void)
+void deinitInputs(void)
+{
+    free(mouse);
+}
+void updateInputs(void)
 {
     int i;
     for (i = 0; i < KEYS_LENGTH; ++i)
@@ -100,13 +101,13 @@ int updateInputs(void)
             break;
         /* Mouse Movement */
         case SDL_MOUSEMOTION:
-            Mouse.x = e.motion.x;
-            Mouse.y = e.motion.y;
+            mouse->x = e.motion.x;
+            mouse->y = e.motion.y;
             break;
         /* Window Event */
         case SDL_WINDOWEVENT:
             /* We only care about window resizes here */
-            if (e.event != SDL_WINDOWEVENT_RESIZED)
+            if (e.window.event != SDL_WINDOWEVENT_RESIZED)
                 break;
             winW = e.window.data1;
             winH = e.window.data2;
@@ -123,6 +124,7 @@ int updateInputs(void)
             break;
         }
     }
+    
 }
 
 int getInput(int num)
@@ -146,7 +148,7 @@ void handleInputs(int *paused, int *going)
     if (stop)
     {
         *going = 0;
-        break;
+        return;
     }
     /* Set PAUSED when spacebar is pressed */
     if (getFirstInput(SPACE))
@@ -160,6 +162,9 @@ void handleInputs(int *paused, int *going)
     {
         if (keyFuncs[i] == NULL)
             continue;
+        /* If the funciton doensn't need to be called... */
+        if (!getInput(i))
+            continue;
         /* If the funciton exists, call it */
         keyFuncs[i]();
     }
@@ -172,6 +177,7 @@ void setKeyFunc(int key, void (*f)(void))
 {
     if (key < 0 || key >= KEYS_LENGTH)
         return;
+    printf("Setting key function: %d\n", key);
     keyFuncs[key] = f;
 }
 
@@ -184,7 +190,10 @@ int getWindowH(void)
     return winH;
 }
 
-
+Mouse* getMouse(void)
+{
+    return mouse;
+}
 
 
 
