@@ -16,9 +16,9 @@ void addCell(Cell **head, Cell *c)
 {
     Cell *curr = *head;
     
-    if (*head == NULL)
+    if (curr == NULL)
     {
-        *head = c;
+        curr = c;
         return;
     }
     while (curr->next != NULL)

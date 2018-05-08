@@ -194,17 +194,15 @@ void clearBoard(void)
     currRows = createRow(0);
     prevRows = createRow(0);
 }
+/* TODO: stop this from crashing the program */
 void onClick(void)
 {
     printf("running onClick()\n");
     int x, y; /* The x, y of THE CELL the mouse is over */
     Row *r;
     
-    /* TODO: stop being an idiot and make the cell have an actual x, y location
-     * instead of just giving it the x, y of the mouse position!
-     */
-    x = (mouse->x + offsetX) / WINDOW_W;
-    y = (mouse->y + offsetY) / WINDOW_H;
+    x = mouse->x;
+    y = mouse->y;
     
     /* Left click */
     if (getInput(L_CLICK))

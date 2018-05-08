@@ -16,8 +16,12 @@ SDL_Surface *blackSurface;
 /* CELL_W and CELL_H are changed when the zoom is changed, and
  * WINDOW_W and WINDOW_H are changed when the window is resized
  */ 
-int CELL_W, CELL_H;
+int WINDOW_W, WINDOW_H, CELL_W, CELL_H;
 int zoom = 100;
+
+/* The offsets are for rendering */
+/* Measured by # of pixels */
+int offsetX, offsetY;
 
 /* Keypress functions */
 void windowResized(void);
@@ -38,9 +42,6 @@ int initRender(int *going)
     WINDOW_H = 500;
     CELL_W = 10;
     CELL_H = 10;
-    offsetX = 0;
-    offsetY = 0;
-    
     
     /* Create the main window and its surface */
     window = SDL_CreateWindow("Conway's Game of Life", 

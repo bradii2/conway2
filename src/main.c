@@ -16,18 +16,19 @@
 #include "inputs.h"
 #include "game.h"
 #define SDL_MAIN_HANDLED
-#include <SDL2/SDL.h>
+#include "SDL2/SDL.h"
 
 int going  = 1;
 int paused = 1;
 
-void init(void);
+int init(void);
 void deinit(void);
 
 
 int main(int argc, char *argv[])
 {
-    init();
+    if(init())
+        return 1;
     
     while (going)
     {
@@ -48,12 +49,14 @@ int main(int argc, char *argv[])
     deinit();
 }
 
-void init(void)
+int init(void)
 {
     /* Call initInputs() before any other inits that use setKeyFunc()! */
     initInputs();
-    initRender(&going);
+    if (initRender(&going) != 0)
+        return 1;
     initGame();
+    return 0;
 }
 void deinit(void)
 {
